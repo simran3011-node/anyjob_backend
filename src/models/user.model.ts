@@ -6,17 +6,15 @@ import { emit } from "process";
 
 
 const UserSchema: Schema<IUser> = new Schema({
-    fullName: {
+    firstName: {
         type: String,
-        required: [true, "Full name is required"],
+        required: [true, "First name is required"],
         trim: true,
         index: true,
     },
-    username: {
+    lastName: {
         type: String,
-        required: [true, "Username is required"],
-        unique: true,
-        lowercase: true,
+        required: [true, "Last name is required"],
         trim: true,
         index: true,
     },
@@ -25,14 +23,11 @@ const UserSchema: Schema<IUser> = new Schema({
         required: [true, "Email Address is required"],
         unique: true,
         lowercase: true,
-        trim: true,
     },
-    watchHistory: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "Videos",
-        },
-    ],
+    phone: {
+        type: Number,
+        required: false
+    },
     password: {
         type: String,
         required: [true, "Password is required"],
@@ -41,9 +36,14 @@ const UserSchema: Schema<IUser> = new Schema({
         type: String,
         required: true,
     },
-    coverImage: {
+    signupType: {
         type: String,
-        default: "",
+        default: "regular"
+    },
+    userType: {
+        type: String,
+        enum: ["SuperAdmin", "ServiceProvider", "Customer"],
+        default: ""
     },
     refreshToken: {
         type: String,
@@ -67,12 +67,12 @@ UserSchema.pre("save", async function (next) {
 });
 
 //check password
-UserSchema.methods.isPasswordCorrect = async function(password:string):Promise<boolean> {
-    return await bcrypt.compare(password,this.password)
+UserSchema.methods.isPasswordCorrect = async function (password: string): Promise<boolean> {
+    return await bcrypt.compare(password, this.password)
 }
 
 //generate acces token
-UserSchema.methods.generateAccessToken =  function(): string {
+UserSchema.methods.generateAccessToken = function (): string {
     return jwt.sign({
         _id: this._id,
         email: this.email,
@@ -81,10 +81,10 @@ UserSchema.methods.generateAccessToken =  function(): string {
     }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY })
 };
 
-UserSchema.methods.generateRefreshToken = function():string{
+UserSchema.methods.generateRefreshToken = function (): string {
     return jwt.sign({
-        _id:this._id
-    },process.env.REFRESH_TOKEN_SECRET as string, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY })
+        _id: this._id
+    }, process.env.REFRESH_TOKEN_SECRET as string, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY })
 };
 
 

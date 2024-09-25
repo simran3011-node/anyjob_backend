@@ -10,7 +10,7 @@ type ValidatorFunction = (data: any) => ValidationResult;
 const ModelAuth = (validator: ValidatorFunction) => {
     return (req: Request, res: Response, next: NextFunction) => {
         const { error, value } = validator(req.body);
-        console.log(req.body);
+        // console.log(req.body);
         
         if (error) {
             // Create an ApiError instance for validation errors

@@ -18,7 +18,6 @@ const router: Router = express.Router();
 router.route('/signup').post(
     upload.fields([
         { name: "avatar", maxCount: 1 },
-        { name: "coverImage", maxCount: 1 }
     ]),
     [ModelAuth(ValidateUser)],
     registerUser,

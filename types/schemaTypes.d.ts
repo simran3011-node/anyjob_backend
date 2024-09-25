@@ -2,13 +2,14 @@ import { Document,ObjectId } from "mongoose";
 
 export interface IUser extends Document {
     _id: string | ObjectId;
-    fullName: string;
-    username: string;
+    firstName: string;
+    lastName: string;
     email: string;
-    watchHistory: Array<ObjectId>;
+    phone:number;
     password: string;
     avatar: string;
-    coverImage?: string;
+    signupType:string;
+    userType:string;
     refreshToken?: string;
     isPasswordCorrect(password: string): Promise<boolean>;
     generateAccessToken(): string;

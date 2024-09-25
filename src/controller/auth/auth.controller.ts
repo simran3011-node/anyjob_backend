@@ -1,32 +1,33 @@
-import { Request,Response } from "express";
+import { Request, Response } from "express";
 import UserModel from "../../models/user.model";
 import { ApiError } from "../../utils/ApisErrors";
-import { ICredentials,ILoginCredentials,IRegisterCredentials } from "../../../types/requests_responseType";
-import { sendSuccessResponse,sendErrorResponse } from "../../utils/response";
+import { ICredentials, ILoginCredentials, IRegisterCredentials } from "../../../types/requests_responseType";
+import { sendSuccessResponse, sendErrorResponse } from "../../utils/response";
 import { generateAccessAndRefreshToken } from "../../utils/createTokens";
 import { CustomRequest } from "../../../types/commonType";
 import { ApiResponse } from "../../utils/ApiResponse";
 import { uploadOnCloudinary } from "../../utils/cloudinary";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { IUser } from "../../../types/schemaTypes";
-import jwt,{JwtPayload} from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 
 //register user controller
-export const registerUser = asyncHandler( async(req:Request,res:Response)=>{
-    const { fullName, username, email, password }: IRegisterCredentials = req.body;
+export const registerUser = asyncHandler(async (req: Request, res: Response) => {
+    const { firstName, lastName, email, password, userType }: IRegisterCredentials = req.body;
+    // console.log("req.body==>",req.body);
+    // return;
+    
 
     // Validate fields (Joi validation is preferred here)
-    if ([fullName, username, email, password].some((field) => field?.trim() === "")) {
+    if ([firstName, lastName, email, password, userType].some((field) => field?.trim() === "")) {
         return sendErrorResponse(res, new ApiError(400, "All fields are required"));
     }
 
     // Check for duplicate user
-    const existingUser = await UserModel.findOne({
-        $or: [{ username }, { email }]
-    });
+    const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-        return sendErrorResponse(res, new ApiError(409, "User with email or username already exists"));
+        return sendErrorResponse(res, new ApiError(409, "User with email already exists"));
     };
 
     // Ensure `req.files` is defined and has the expected structure
@@ -37,7 +38,6 @@ export const registerUser = asyncHandler( async(req:Request,res:Response)=>{
     };
 
     const avatarFile = files.avatar ? files.avatar[0] : undefined;
-    const coverImageFile = files.coverImage ? files.coverImage[0] : undefined;
 
     if (!avatarFile) {
         return sendErrorResponse(res, new ApiError(400, "Avatar file is required"));
@@ -45,54 +45,48 @@ export const registerUser = asyncHandler( async(req:Request,res:Response)=>{
 
     // Upload files to Cloudinary
     const avatar = await uploadOnCloudinary(avatarFile.path);
-    const coverImage = coverImageFile ? await uploadOnCloudinary(coverImageFile.path) : undefined;
 
     if (!avatar) {
         return sendErrorResponse(res, new ApiError(400, "Error uploading avatar file"));
     };
 
     // Create new user
-    const newUser = await UserModel.create({
-        fullName,
-        username: username.toLowerCase(),
+    const newUser = new UserModel({
+        firstName,
+        lastName,
         email,
         password,
+        userType,
         avatar: avatar.url,
-        coverImage: coverImage?.url
     });
+    const savedUser = await newUser.save()
 
-    const createdUser = await UserModel.findById(newUser._id).select("-password -refreshToken");
+    const createdUser = await UserModel.findById(savedUser._id).select("-password -refreshToken");
     console.log(createdUser);
-    
+
     if (!createdUser) {
         return sendErrorResponse(res, new ApiError(500, "Something went wrong while registering the user"));
     };
 
-    return sendSuccessResponse(res, 201, createdUser , "User Registered Successfully");
+    return sendSuccessResponse(res, 201, createdUser, "User Registered Successfully");
 });
 
 //login user controller
-export const loginUser = asyncHandler(async(req:Request,res:Response)=>{
-    const {username,email,password}:IUser = req.body;
+export const loginUser = asyncHandler(async (req: Request, res: Response) => {
+    const { email, password }: IUser = req.body;
 
-    if(!(username || email)){
-        return sendErrorResponse(res, new ApiError(400, "Username or Email is required"));
+    if (!email) {
+        return sendErrorResponse(res, new ApiError(400, "Email is required"));
     };
 
-    const user = await UserModel.findOne(
-        {
-            $or:[
-                {username},
-                {email}
-            ]
-        }
+    const user = await UserModel.findOne({ email }
     );
-    if(!user){
-        return sendErrorResponse(res, new ApiError(400, "User does not exist")); 
+    if (!user) {
+        return sendErrorResponse(res, new ApiError(400, "User does not exist"));
     };
 
-    const isPasswordValid =  await user.isPasswordCorrect(password);
-    if(!isPasswordValid){
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if (!isPasswordValid) {
         return sendErrorResponse(res, new ApiError(403, "Invalid user credentials"));
     };
 
