@@ -69,9 +69,28 @@ const ServiceSchema: Schema<IServiceSchema> = new Schema({
             answer: {
                 type: String,
                 required: true
-            }
+            },
+            parentId:{
+                type:Schema.Types.ObjectId,
+                default:null
+            },
+            
         }
     ],
+    serviceProductImage:{
+        type:String
+    },
+    otherInfo:{
+        type:{
+            productSerialNumber:{
+                type:Number
+            },
+            serviceDescription:{
+                type:String
+            }
+    
+        }
+    },
     userId:{
         type:Schema.Types.ObjectId,
         ref:"user"

@@ -6,6 +6,20 @@ import { sendErrorResponse, sendSuccessResponse } from "../utils/response";
 import { IServiceSchema } from "../../types/schemaTypes";
 import { asyncHandler } from "../utils/asyncHandler";
 import mongoose, { ObjectId } from "mongoose";
+import { sendSMS } from "../utils/twilio";
+
+// const restructureAnswers = (answers: any[]) => {
+//     const mainQuestions = answers.filter(answer => !answer.parentId);
+//     const derivedQuestions = answers.filter(answer => answer.parentId);
+
+//     mainQuestions.forEach(mainQuestion => {
+//         mainQuestion.derivedQuestions = derivedQuestions.filter(
+//             derivedQuestion => derivedQuestion.parentId === mainQuestion.questionId
+//         );
+//     });
+
+//     return mainQuestions;
+// };
 
 export const addService = asyncHandler(async (req: CustomRequest, res: Response<IServiceSchema>) => {
     const { categoryId, subCategoryId, serviceStartDate, serviceShifft, shiftTime, serviceZipCode, serviceLatitude, serviceLongitude, isIncentiveGiven, incentiveAmount,userId,answers }: { categoryId: ObjectId, subCategoryId: ObjectId, serviceStartDate: Date, serviceShifft: String, shiftTime: object, serviceZipCode: Number, serviceLatitude: Number, serviceLongitude: Number, isIncentiveGiven: Boolean, incentiveAmount: Number,userId:ObjectId,answers:Array<any> } = req.body;
@@ -31,6 +45,7 @@ export const addService = asyncHandler(async (req: CustomRequest, res: Response<
         return sendErrorResponse(res, new ApiError(500, "Something went wrong while creating the Service Request."));
     };
 
+
     return sendSuccessResponse(res, 201, newService, "Service Request added Successfully");
 });
 
@@ -44,7 +59,7 @@ export const getPendingServiceRequest = asyncHandler(async (req: CustomRequest, 
                 from:"categories",
                 foreignField:"_id",
                 localField:"categoryId",
-                as:"categoryDetails"
+                as:"categoryId"
             }
         },
         {
@@ -58,7 +73,7 @@ export const getPendingServiceRequest = asyncHandler(async (req: CustomRequest, 
                 from:"subcategories",
                 foreignField:"_id",
                 localField:"subCategoryId",
-                as:"subCategoryDetails"
+                as:"subCategoryId"
             }
         },
         {
@@ -78,7 +93,7 @@ export const getPendingServiceRequest = asyncHandler(async (req: CustomRequest, 
                 from:"users",
                 foreignField:"_id",
                 localField:"userId",
-                as:"userDetails"
+                as:"userId"
             }
         },
         {
@@ -87,15 +102,15 @@ export const getPendingServiceRequest = asyncHandler(async (req: CustomRequest, 
                 path:"$userDetails"
             }
         },
-        {
-            $addFields: {
-                categoryName: "$categoryDetails.name",
-                categoryImage: "$categoryDetails.categoryImage",
-                subCategoryName: "$subCategoryDetails.name",
-                subCategoryImage: "$subCategoryDetails.subCategoryImage",
-                serviceCreatorName: "$userDetails.fullName"
-            }
-        },
+        // {
+        //     $addFields: {
+        //         categoryName: "$categoryDetails.name",
+        //         categoryImage: "$categoryDetails.categoryImage",
+        //         subCategoryName: "$subCategoryDetails.name",
+        //         subCategoryImage: "$subCategoryDetails.subCategoryImage",
+        //         serviceCreatorName: "$userDetails.fullName"
+        //     }
+        // },
         {
             $project:{
                 categoryDetails:0,

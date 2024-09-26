@@ -9,7 +9,9 @@ import { ApiResponse } from "../../utils/ApiResponse";
 import { uploadOnCloudinary } from "../../utils/cloudinary";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { IUser } from "../../../types/schemaTypes";
+import {GoogleAuth} from "../../utils/socialAuth"
 import jwt, { JwtPayload } from 'jsonwebtoken';
+
 
 
 //register user controller
@@ -70,6 +72,8 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
 
     return sendSuccessResponse(res, 201, createdUser, "User Registered Successfully");
 });
+
+
 
 //login user controller
 export const loginUser = asyncHandler(async (req: Request, res: Response) => {
@@ -183,3 +187,48 @@ export const refreshAccessToken = asyncHandler(async (req: CustomRequest, res: R
         return sendErrorResponse(res, new ApiError(401, exc.message || "Invalid refresh token"));
     };
 });
+
+// Auth user (Social)
+export const AuthUserSocial = async (req:CustomRequest, res:Response) => {
+    try {
+        // Check if user object is already attached by the middleware
+        let user:any = req.user;
+        // console.log(user);
+        
+
+        // If user object is not attached, it means user needs to be fetched from req.body
+        if (!user) {
+            const { email, uid, displayName, photoURL, phoneNumber, providerId,userType } = req.body;
+            // console.log(req.body);
+            
+
+            // Check if user already exists in the database
+            user = await UserModel.findOne({ email: email });
+
+            if (!user) {
+
+                // If user doesn't exist, create a new one
+                if (providerId === "google.com") {
+                    user = await GoogleAuth(email, uid, displayName, photoURL, phoneNumber,userType);
+                } else if (providerId === "facebook.com") {
+                    return res.status(400).json({ success: false, message: "Facebook login is not supported yet" });
+                }
+                // Handle error while creating user
+                if (user.err) {
+                    return res.status(500).json({ success: false, message: user.message, error: user.err });
+                }
+            }
+        };
+
+        // Continue with login logic
+        const USER_DATA = { ...user._doc, remember_me: false, auth_type: "social" };
+        const tokenData = generateAccessAndRefreshToken(res,USER_DATA._id);
+        return res.status(200).json({ success: true, message: "Login Successful!", data: USER_DATA, token: tokenData });
+
+    } catch (exc:any) {
+        console.log(exc.message);
+        return res.status(500).json({ success: false, message: "Internal server error", error: exc.message });
+    }
+};
+
+

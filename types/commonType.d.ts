@@ -11,5 +11,5 @@ export type DBInfo = {
 export type RequestHandler = (req: Request, res: Response, next: NextFunction) => Promises<any>;
 export type AsyncHandler = (req: Request, res: Response, next: NestedPaths) => Promises<any>;
 export interface CustomRequest extends Request {
-    user?: IUser
+    user?: any
 };

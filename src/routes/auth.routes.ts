@@ -7,10 +7,13 @@ import {
     logoutUser,
     loginUser,
     registerUser,
+    AuthUserSocial
 } from "../controller/auth/auth.controller";
 import { upload } from "../middlewares/multer.middleware";
 import validateUser from "../models/validator/user.validate";
 import { VerifyJWTToken } from "../middlewares/auth/userAuth";
+import {HandleSocialAuthError} from '../middlewares/auth/socialAuth';
+
 
 const router: Router = express.Router();
 
@@ -23,6 +26,9 @@ router.route('/signup').post(
     registerUser,
     loginUser
 );
+
+// Auth user (social)
+router.post('/user/social', [ HandleSocialAuthError], AuthUserSocial);
 
 //login or sign-in route
 router.route('/signin').post(

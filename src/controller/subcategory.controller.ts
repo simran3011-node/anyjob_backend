@@ -43,14 +43,32 @@ export const addSubCategory = asyncHandler(async (req: CustomRequest, res: Respo
 
     // Step 2: Create and save questions to the Question collection, linking with the created subCategoryId
     const savedQuestions = questionArray.map(async (questionData: any) => {
-        const newQuestion = await QuestionModel.create({
+        const mainQuestion = await QuestionModel.create({
             categoryId,
             subCategoryId: newSubCategory._id,
             question: questionData.question,
             options: questionData.options,
             optionSelected: questionData.optionSelected
         });
-        return newQuestion._id; // Return the question ObjectId
+        if (questionData.derivedQuestions && questionData.derivedQuestions.length > 0) {
+            // Create derived questions and set parentId as the mainQuestion._id
+            const derivedQuestionPromises = questionData.derivedQuestions.map(async (derivedQuestionData: any) => {
+                const derivedQuestion = await QuestionModel.create({
+                    categoryId,
+                    subCategoryId: newSubCategory._id,
+                    question: derivedQuestionData.question,
+                    options: derivedQuestionData.options,
+                    optionSelected: derivedQuestionData.optionSelected,
+                    parentId: mainQuestion._id // Set parentId to the main question's ObjectId
+                });
+            });
+
+            // Wait for all derived questions to be saved
+            const derivedQuestionIds = await Promise.all(derivedQuestionPromises);
+
+            
+        }
+        return mainQuestion._id; // Return the question ObjectId
     })
 
 

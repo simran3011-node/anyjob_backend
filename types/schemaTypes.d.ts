@@ -9,6 +9,7 @@ export interface IUser extends Document {
     password: string;
     avatar: string;
     signupType:string;
+    platformId?:string;
     userType:string;
     refreshToken?: string;
     isPasswordCorrect(password: string): Promise<boolean>;
@@ -51,9 +52,11 @@ export interface IServiceSchema extends Document {
     serviceLongitude:number;
     isIncentiveGiven:boolean;
     incentiveAmount:number;
-    isApproved:string,
-    userId:ObjectId,
-    answers:Array<any>
+    isApproved:string;
+    serviceProductImage:string;
+    otherInfo:object;
+    userId:ObjectId;
+    answers:Array<any>;
     isDeleted:boolean;
     createdAt?: Date;
     updatedAt?: Date;
@@ -66,6 +69,7 @@ export interface IQuestionSchema extends Document {
     question:string;
     options:Array;
     optionSelected:string;
+    parentId:ObjectId;
     subCategoryImage:string;
     isDeleted:boolean;
     createdAt?: Date;

@@ -22,6 +22,10 @@ const QuestionSchema: Schema<IQuestionSchema> = new Schema({
         of: String,   
         required: [true, "Options are required"]
     },
+    parentId:{
+        type:mongoose.Schema.Types.ObjectId,
+        default:null
+    },
     optionSelected: {
         type: String,
         enum: ['A', 'B', 'C', 'D','E'],  
