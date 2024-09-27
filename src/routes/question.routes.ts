@@ -3,7 +3,6 @@ import { VerifyJWTToken } from "../middlewares/auth/userAuth";
 import QuestionModel from "../models/question.model";
 import {
     fetchQuestionsSubCategorySubCategorywise,
-    fetchDerivedQuestion
 } from "../controller/question.controller";
 
 const router:Router = express.Router();
@@ -11,7 +10,6 @@ const router:Router = express.Router();
 
 
 router.route('/:categoryId/:subCategoryId').get(fetchQuestionsSubCategorySubCategorywise);
-router.route('/:questionId').get(fetchDerivedQuestion);
 
 
 

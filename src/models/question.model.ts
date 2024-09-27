@@ -1,42 +1,49 @@
-import mongoose, { Schema, Model } from "mongoose";
-import { IQuestionSchema } from "../../types/schemaTypes";
-import { string } from "joi";
+import mongoose, { Document, Schema, Model, model } from 'mongoose';
 
-const QuestionSchema: Schema<IQuestionSchema> = new Schema({
-    categoryId: {
-        type: Schema.Types.ObjectId,
-        ref: "category",
-        required: [true, "Category Id is Required"]
-    },
-    subCategoryId: {
-        type: Schema.Types.ObjectId,
-        ref: "subcategory",
-        required: [true, "Subcategory Id is Required"]
-    },
-    question: {
-        type: String,
-        required: [true, "Question is required"]
-    },
-    options: {
-        type: Map,  
-        of: String,   
-        required: [true, "Options are required"]
-    },
-    parentId:{
-        type:mongoose.Schema.Types.ObjectId,
-        default:null
-    },
-    optionSelected: {
-        type: String,
-        enum: ['A', 'B', 'C', 'D','E'],  
-        required: false              
-    },
-    isDeleted: {
-        type: Boolean,
-        default: false,
-    }
-}, { timestamps: true });
+// Interface for Derived Question
+interface IDerivedQuestion extends Document {
+  option: string;
+  question: string;
+  options: Map<string, string>;
+  derivedQuestions: IDerivedQuestion[];
+}
 
+// Interface for Main Question
+interface IQuestion extends Document {
+  categoryId: mongoose.Types.ObjectId;
+  subCategoryId: mongoose.Types.ObjectId;
+  question: string;
+  options: Map<string, string>;
+  derivedQuestions: IDerivedQuestion[]; // Derived questions are stored here
+}
 
-const QuestionModel:Model<IQuestionSchema> = mongoose.model<IQuestionSchema>('question',QuestionSchema);
+// Schema for Derived Questions (Recursive Structure)
+const derivedQuestionSchema = new Schema<IDerivedQuestion>({
+  option: { type: String, required: true },
+  question: { type: String, required: true },
+  options: {
+    type: Map,
+    of: String,
+    required: true,
+  },
+  derivedQuestions: [this] // Recursively storing derived questions
+});
+
+// Main Question Schema
+const questionSchema = new Schema<IQuestion>({
+  categoryId: { type: Schema.Types.ObjectId, required: true, ref: 'Category' },
+  subCategoryId: { type: Schema.Types.ObjectId, required: true, ref: 'SubCategory' },
+  question: { type: String, required: true },
+  options: {
+    type: Map,
+    of: String,
+    required: true,
+  },
+  derivedQuestions: [derivedQuestionSchema] // Storing derived questions within main question
+});
+
+// Create and export the Question model
+const QuestionModel: Model<IQuestion> = model<IQuestion>('Question', questionSchema);
 export default QuestionModel;
+
+

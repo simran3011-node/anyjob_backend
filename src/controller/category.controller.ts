@@ -5,12 +5,11 @@ import { CustomRequest } from "../../types/commonType";
 import { ApiError } from "../utils/ApisErrors";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/response";
 import CategoryModel from "../models/category.model";
-import { ICategorySchema } from "../../types/schemaTypes";
 import { uploadOnCloudinary } from "../utils/cloudinary";
 
 
 // addCategory controller
-export const addCategory = asyncHandler(async (req: CustomRequest, res: Response<ICategorySchema>) => {
+export const addCategory = asyncHandler(async (req: CustomRequest, res: Response) => {
     const { name, categoryImage }: { name: String, categoryImage: String } = req.body;
 
     // Trim and convert name to lowercase
@@ -48,7 +47,7 @@ export const addCategory = asyncHandler(async (req: CustomRequest, res: Response
 });
 
 //fetch all category
-export const getCategories = asyncHandler(async (req: CustomRequest, res: Response<ICategorySchema>) => {
+export const getCategories = asyncHandler(async (req: CustomRequest, res: Response) => {
 
     const results = await CategoryModel.aggregate([
         {
@@ -66,7 +65,7 @@ export const getCategories = asyncHandler(async (req: CustomRequest, res: Respon
 
 
 // updateCategory controller
-export const updateCategory = asyncHandler(async (req: CustomRequest, res: Response<ICategorySchema>) => {
+export const updateCategory = asyncHandler(async (req: CustomRequest, res: Response) => {
     const { CategoryId } = req.params;
     const { name }: { name: string } = req.body;
     console.log(req.params);

@@ -56,7 +56,7 @@ export interface IServiceSchema extends Document {
     serviceProductImage:string;
     otherInfo:object;
     userId:ObjectId;
-    answers:Array<any>;
+    answerArray:Array<any>;
     isDeleted:boolean;
     createdAt?: Date;
     updatedAt?: Date;

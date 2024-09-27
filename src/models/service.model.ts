@@ -2,6 +2,35 @@ import mongoose, { Schema, Model } from "mongoose";
 import { IServiceSchema } from "../../types/schemaTypes";
 import { boolean, number, string } from "joi";
 
+
+// Interface for Derived Answer
+interface IDerivedAnswer extends Document {
+    option: string;
+    answer: string;
+    derivedAnswers: IDerivedAnswer[];
+}
+
+// Interface for Answer
+interface IAnswer extends Document {
+    answer: string;
+    selectedOption: string;
+    derivedAnswers: IDerivedAnswer[];
+}
+
+// Schema for Derived Answer (Recursive)
+const derivedAnswerSchema = new Schema<IDerivedAnswer>({
+    option: { type: String, required: true },
+    answer: { type: String, required: true },
+    derivedAnswers: [this] // Recursive structure to hold derived answers
+});
+
+// Schema for Main Answer
+const answerSchema = new Schema<IAnswer>({
+    answer: { type: String, required: true },
+    selectedOption: { type: String, required: true },
+    derivedAnswers: [derivedAnswerSchema] // Derived answers are nested here
+});
+
 const ServiceSchema: Schema<IServiceSchema> = new Schema({
     categoryId: {
         type: Schema.Types.ObjectId,
@@ -20,7 +49,7 @@ const ServiceSchema: Schema<IServiceSchema> = new Schema({
     serviceShifft: {
         type: String,
         enum: ["Morning", "LateMorning", "Evening"],
-        required: [true, "Service Shift is Required"]
+        // required: [true, "Service Shift is Required"]
     },
     shiftTime: {
             startTime: {
@@ -59,24 +88,8 @@ const ServiceSchema: Schema<IServiceSchema> = new Schema({
         enum:["Pending","Approved","Rejected"],
         default:"Pending"
     },
-    answers: [
-        {
-            questionId: {
-                type: Schema.Types.ObjectId,
-                ref: "question",
-                required: true
-            },
-            answer: {
-                type: String,
-                required: true
-            },
-            parentId:{
-                type:Schema.Types.ObjectId,
-                default:null
-            },
-            
-        }
-    ],
+     // Answer array to store answers and derived answers
+     answerArray: [answerSchema],
     serviceProductImage:{
         type:String
     },
