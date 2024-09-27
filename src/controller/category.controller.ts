@@ -1,16 +1,17 @@
 import { Response } from "express";;
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler";
 import { CustomRequest } from "../../types/commonType";
 import { ApiError } from "../utils/ApisErrors";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/response";
 import CategoryModel from "../models/category.model";
 import { uploadOnCloudinary } from "../utils/cloudinary";
+import { IAddCategoryPayloadReq } from "../../types/requests_responseType";
 
 
 // addCategory controller
 export const addCategory = asyncHandler(async (req: CustomRequest, res: Response) => {
-    const { name, categoryImage }: { name: String, categoryImage: String } = req.body;
+    const { name, categoryImage }: IAddCategoryPayloadReq = req.body;
 
     // Trim and convert name to lowercase
     const trimmedName = name.trim().toLowerCase();
@@ -66,7 +67,7 @@ export const getCategories = asyncHandler(async (req: CustomRequest, res: Respon
 
 // updateCategory controller
 export const updateCategory = asyncHandler(async (req: CustomRequest, res: Response) => {
-    const { CategoryId } = req.params;
+    const { CategoryId }  = req.params;
     const { name }: { name: string } = req.body;
     console.log(req.params);
 

@@ -6,19 +6,9 @@ import { sendErrorResponse, sendSuccessResponse } from "../utils/response";
 import { asyncHandler } from "../utils/asyncHandler";
 import mongoose, { ObjectId } from "mongoose";
 import { sendSMS } from "../utils/twilio";
+import { IAddServicePayloadReq } from "../../types/requests_responseType";
 
-// const restructureAnswers = (answers: any[]) => {
-//     const mainQuestions = answers.filter(answer => !answer.parentId);
-//     const derivedQuestions = answers.filter(answer => answer.parentId);
 
-//     mainQuestions.forEach(mainQuestion => {
-//         mainQuestion.derivedQuestions = derivedQuestions.filter(
-//             derivedQuestion => derivedQuestion.parentId === mainQuestion.questionId
-//         );
-//     });
-
-//     return mainQuestions;
-// };
 
 export const addService = asyncHandler(async (req: CustomRequest, res: Response) => {
     const {
@@ -34,20 +24,7 @@ export const addService = asyncHandler(async (req: CustomRequest, res: Response)
         incentiveAmount,
         userId,
         answerArray // Expecting answerArray instead of answers
-    }: {
-        categoryId: ObjectId,
-        subCategoryId: ObjectId,
-        serviceStartDate: Date,
-        serviceShift: String,
-        shiftTime: object,
-        serviceZipCode: Number,
-        serviceLatitude: Number,
-        serviceLongitude: Number,
-        isIncentiveGiven: Boolean,
-        incentiveAmount: Number,
-        userId: ObjectId,
-        answerArray: Array<any> // Change to answerArray
-    } = req.body;
+    }: IAddServicePayloadReq = req.body;
 
     // Prepare the new service object
     const newService = await ServiceModel.create({
@@ -127,11 +104,11 @@ export const getPendingServiceRequest = asyncHandler(async (req: CustomRequest, 
                 'userId.refreshToken': 0,
                 'userId.isDeleted': 0,
                 'userId.__v': 0,
-                'userId.signupType':0,
+                'userId.signupType': 0,
                 'subCategoryId.isDeleted': 0,
                 'subCategoryId.__v': 0,
-                'categoryId.isDeleted': 0,
-                'categoryId.__v': 0,
+                // 'categoryId.isDeleted': 0,
+                // 'categoryId.__v': 0,
 
 
             }
@@ -150,7 +127,7 @@ export const getPendingServiceRequest = asyncHandler(async (req: CustomRequest, 
 // updateService controller
 export const updateService = asyncHandler(async (req: CustomRequest, res: Response) => {
     const { serviceId } = req.params;
-    const { categoryId, subCategoryId, serviceStartDate, serviceShifft, shiftTime, serviceZipCode, serviceLatitude, serviceLongitude, isIncentiveGiven, incentiveAmount }: { categoryId: ObjectId, subCategoryId: ObjectId, serviceStartDate: Date, serviceShifft: String, shiftTime: object, serviceZipCode: Number, serviceLatitude: Number, serviceLongitude: Number, isIncentiveGiven: Boolean, incentiveAmount: Number, userId: ObjectId } = req.body;
+    const { isApproved }: { isApproved: Boolean } = req.body;
     console.log(req.params);
 
 
@@ -162,16 +139,7 @@ export const updateService = asyncHandler(async (req: CustomRequest, res: Respon
         { _id: new mongoose.Types.ObjectId(serviceId) },
         {
             $set: {
-                categoryId,
-                subCategoryId,
-                serviceStartDate,
-                serviceShifft,
-                shiftTime,
-                serviceZipCode,
-                serviceLatitude,
-                serviceLongitude,
-                isIncentiveGiven,
-                incentiveAmount,
+                isApproved
             }
         }, { new: true }
     );

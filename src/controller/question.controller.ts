@@ -1,11 +1,9 @@
 import { Response } from "express";
 import { CustomRequest } from "../../types/commonType";
 import QuestionModel from "../models/question.model";
-import { ApiError } from "../utils/ApisErrors";
-import { sendErrorResponse, sendSuccessResponse } from "../utils/response";
-import { IQuestionSchema, IServiceSchema } from "../../types/schemaTypes";
+import { sendSuccessResponse } from "../utils/response";
 import { asyncHandler } from "../utils/asyncHandler";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 
 export const fetchQuestionsSubCategorySubCategorywise = asyncHandler(async (req:CustomRequest,res:Response)=>{
     const {categoryId,subCategoryId } = req.params;
@@ -23,9 +21,4 @@ export const fetchQuestionsSubCategorySubCategorywise = asyncHandler(async (req:
 
     }, "Questions retrieved successfully for the given Subcategory.");
 });
-
-
-
-
-
 

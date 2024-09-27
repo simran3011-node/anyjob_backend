@@ -8,10 +8,11 @@ import { AsyncHandler } from "../../types/commonType";
 import { asyncHandler } from "../utils/asyncHandler";
 import mongoose, { ObjectId } from "mongoose";
 import { uploadOnCloudinary } from "../utils/cloudinary";
+import { IAddSubCategoryPayloadReq, IQuestion } from "../../types/requests_responseType";
 
 // addSubCategory controller
 export const addSubCategory = asyncHandler(async (req: CustomRequest, res: Response) => {
-    const { categoryId, name, subCategoryImage, questionArray }: { categoryId: mongoose.Types.ObjectId, name: string, subCategoryImage: string, questionArray: Array<any> } = req.body;
+    const { categoryId, name, subCategoryImage, questionArray }: IAddSubCategoryPayloadReq = req.body;
 
     // Trim and convert name to lowercase
     const trimmedName = name.trim().toLowerCase();
@@ -49,11 +50,11 @@ export const addSubCategory = asyncHandler(async (req: CustomRequest, res: Respo
     };
 
     // Iterate over the questionArray and save each question with nested derived questions
-    const questionIds = await Promise.all(questionArray.map((questionData: any) => saveQuestions(questionData, newSubCategory._id as unknown as mongoose.Types.ObjectId)));
+    const questionIds = await Promise.all(questionArray.map((questionData: IQuestion) => saveQuestions(questionData, newSubCategory._id as unknown as mongoose.Types.ObjectId)));
 
     // Optionally, store the array of question IDs in the subcategory (if needed)
-    newSubCategory.questionArray = questionIds;
-    await newSubCategory.save();
+    // newSubCategory.questionArray = questionIds;
+    // await newSubCategory.save();
 
     return sendSuccessResponse(res, 201, newSubCategory, "Subcategory and questions added successfully.");
 });

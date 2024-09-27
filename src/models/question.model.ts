@@ -1,21 +1,7 @@
 import mongoose, { Document, Schema, Model, model } from 'mongoose';
+import { IDerivedQuestion, IQuestion } from '../../types/requests_responseType';
 
-// Interface for Derived Question
-interface IDerivedQuestion extends Document {
-  option: string;
-  question: string;
-  options: Map<string, string>;
-  derivedQuestions: IDerivedQuestion[];
-}
 
-// Interface for Main Question
-interface IQuestion extends Document {
-  categoryId: mongoose.Types.ObjectId;
-  subCategoryId: mongoose.Types.ObjectId;
-  question: string;
-  options: Map<string, string>;
-  derivedQuestions: IDerivedQuestion[]; // Derived questions are stored here
-}
 
 // Schema for Derived Questions (Recursive Structure)
 const derivedQuestionSchema = new Schema<IDerivedQuestion>({
